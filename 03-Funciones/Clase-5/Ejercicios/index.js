@@ -12,7 +12,16 @@
 // Prueba: repetirHola(3).
 
 
+function repetirHola(n) {
+  let messsage = "hola"
+  if (n <= 0){
+    return
+  }
+  console.log(messsage)
+  repetirHola(n - 1)
+}
 
+repetirHola(3)
 
 
 // 🟡 Ejercicio 2: Factorial (Clásico matemático)
@@ -27,8 +36,15 @@
 // Prueba: console.log(factorial(5)) debería dar 120.
 
 
+function factorial (n) {
+  if (n <= 1) {
+    return 1
+  }
 
+  return n * factorial(n - 1)
+}
 
+console.log(factorial(4))
 
 // 🔴 Ejercicio 3: Suma Recursiva (Acumulando)
 // Crea una función sumarHasta(numero).
@@ -38,3 +54,13 @@
 // Ejemplo: sumarHasta(4) sería 4 + 3 + 2 + 1 = 10.
 
 // Usa la misma lógica que el factorial, pero sumando en vez de multiplicando.
+
+
+function sumRecursive(n) {
+  if(n <= 0){
+    return 0
+  }
+  return n + sumRecursive(n - 1)
+}
+
+console.log(sumRecursive(5))
