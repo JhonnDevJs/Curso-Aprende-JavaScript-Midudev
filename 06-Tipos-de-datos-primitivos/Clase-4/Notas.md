@@ -1,312 +1,202 @@
-Number
-El tipo number en JavaScript representa tanto números enteros como decimales. A diferencia de otros lenguajes que tienen tipos separados para enteros y flotantes, JavaScript unifica todo en un solo tipo number.
+BigInt
+BigInt es un tipo de dato primitivo que fue introducido en ES2020 (ES11) para representar números enteros de tamaño arbitrario. Mientras que el tipo number tiene limitaciones de precisión, BigInt puede manejar enteros tan grandes como la memoria lo permita.
 
-Características del tipo Number
-JavaScript usa el estándar IEEE 754 para representar números, lo que significa:
+¿Por qué necesitamos BigInt?
+El tipo number en JavaScript tiene un límite de precisión para enteros seguros. Mira este ejemplo paso a paso:
 
-64 bits de precisión (double precision)
-Rango aproximado: ±1.7976931348623157 × 10^308
-15-17 dígitos de precisión decimal
-Incluye valores especiales: Infinity, -Infinity y NaN
-// Todos estos son tipo 'number'
-let entero = 42
-let decimal = 3.14159
-let negativo = -17
-let exponencial = 1.5e10 // 15000000000
-let hexadecimal = 0xff // 255
-let binario = 0b1010 // 10
-let octal = 0o777 // 511
+// Límite del tipo number
+const bigNumber = 30000000000000000
+console.log(bigNumber) // 30000000000000000
 
-console.log(typeof entero) // "number"
-console.log(typeof decimal) // "number"
-Creación de números
-Para crear un número en JavaScript... sólo tienes que escribirlo. Lo interesante es que además podemos directamente usar diferentes notaciones, como hemos visto antes, para crear números binarios, hexadecimales, octales y demás.
+// Si le sumaramos 1 a este número, el resultado debería ser:
+// 30000000000000001
 
-1. Literals numéricos (la forma más común)
-// Enteros
-let edad = 25
-let temperatura = -5
+// Pero si lo intentas sumar con JS, el resultado es diferente:
+console.log(bigNumber + 1) // 30000000000000000
+console.log(bigNumber + 2) // 30000000000000000 (¡igual!)
 
-// Decimales
-let precio = 19.99
-let pi = 3.14159
+// Incluso con números grandes, puedes perder precisión
+let numeroGrande = 1234567890123456789
+console.log(numeroGrande) // 1234567890123456800 (¡redondeado!)
+BigInt soluciona este problema permitiendo enteros de cualquier tamaño:
 
-// Notación científica
-let distancia = 1.5e8 // 150,000,000
-let pequeño = 2.5e-4 // 0.00025
+// Con BigInt mantenemos la precisión
+let numeroGrandeBigInt = 1234567890123456789n
+console.log(numeroGrandeBigInt) // 1234567890123456789n (¡exacto!)
+console.log(numeroGrandeBigInt + 1n) // 1234567890123456790n (¡exacto!)
+Creación de BigInt
+Para crear un BigInt, puedes usar el sufijo n al final del número o usar el constructor BigInt(). Además, ten en cuenta que como es un tipo primitivo, el operador typeof te devolverá bigint.
 
-// Diferentes bases
-let hexColor = 0xff0000 // 16777216 (rojo en hex)
-let binario = 0b11111111 // 255
-let octal = 0o377 // 255 (base 8)
-2. Constructor Number()
-Si necesitas crear un número a partir de otro tipo de dato, como string, o desde una variable, puedes usar el constructor Number(). ¡Fíjate que no usamos new al llamarlo! Esto es un detalle importante.
+1. Literal BigInt (sufijo 'n')
+// Enteros con sufijo 'n'
+let grande1 = 123n
+let grande2 = 9007199254740991n
+let grande3 = 1234567890123456789012345678901234567890n
 
-// Crear primitivo
-let numero = Number('42') // 42
-let decimal = Number('3.14') // 3.14
+console.log(typeof grande1) // "bigint"
+2. Constructor BigInt()
+También puedes usar el constructor BigInt() para crear un BigInt. Esto te permitirá pasar un número entero o una cadena de texto para crearlo:
 
-let string = '42'
-let desdeString = Number(string) // 42
-console.log(typeof desdeString) // "number"
+// Desde número (si está en rango seguro)
+let desdeEntero = BigInt(123) // 123n
+let desdeEnteroGrande = BigInt(9007199254740991) // 9007199254740991n
 
-// ❌ NO hagas esto, ya que con new creas un objeto
-let numeroObjeto = new Number(42)
-console.log(typeof numeroObjeto) // "object"
-3. Conversión desde otros tipos
-Por la naturaleza de JavaScript, vas a poder pasarle casi cualquier cosa a Number() e intentará hacer su mejor esfuerzo para convertirlo a número. Ten en cuenta que en algunos casos, el resultado te puede sorprender:
+// Desde string
+let desdeString = BigInt('123456789012345678901234567890')
+// 123456789012345678901234567890n
 
-// Desde booleanos
-let desde_true = Number(true) // 1
-let desde_false = Number(false) // 0
+// Desde string hexadecimal
+let desdeHex = BigInt('0x1fffffffffffff') // 9007199254740991n
 
-// Casos especiales
-let desde_null = Number(null) // 0
-let desde_undefined = Number(undefined) // NaN
-let desde_string_vacia = Number('') // 0
-let desde_string_invalida = Number('abc') // NaN
-Valores especiales
-Hay unas constantes en el objeto Number que representan valores especiales. Además, también hay algunos valores que no se pueden representar con números, como el infinito, el negativo infinito y el NaN.
+// Desde string binaria
+let desdeBin = BigInt('0b11111111111111111111111111111111')
 
-Además, Number tiene algunos métodos que te ayudarán a verificarlos.
+// Desde una variable
+let numeroGrandeEnString = '123456789012345678901234567890'
+let desdeVariable = BigInt(numeroGrandeEnString) // 123456789012345678901234567890n
+3. Limitaciones en la creación
+Debes tener en cuenta algunas consideraciones a la hora de crear de los BigInt para no tener problemas:
 
-Infinity y -Infinity
-// Infinity
-console.log(1 / 0) // Infinity
-console.log(Number.POSITIVE_INFINITY) // Infinity
-console.log(Math.pow(10, 1000)) // Infinity
+// ❌ No funciona con decimales
+// BigInt(3.14) // RangeError: The number 3.14 cannot be converted to a BigInt
 
-// -Infinity
-console.log(-1 / 0) // -Infinity
-console.log(Number.NEGATIVE_INFINITY) // -Infinity
+// ❌ No funciona con números que ya están fuera del rango seguro de Number
+// BigInt(Number.MAX_SAFE_INTEGER + 1) // Puede dar resultados inesperados
 
-// Verificar si es infinito
-console.log(Number.isFinite(42)) // true
-console.log(Number.isFinite(Infinity)) // false
-console.log(isFinite(42)) // true (función global)
-NaN (Not a Number)
-NaN es un valor especial que representa un resultado de una operación matemática que no es un número, de ahí su nombre: Not A Number (no es un número).
+// ❌ No funciona con strings inválidos
+// BigInt("abc") // SyntaxError: Cannot convert abc to a BigInt
+Operaciones con BigInt
+Igual que con los números, también en los BigInt puedes usar los operadores aritméticos, de comparación y bitwise.
 
-Ten en cuenta que NaN es un valor de tipo number. Sí, sé que suena contradictorio. Pero no es un problema de JavaScript, como mucha gente piensa. En realidad es parte de la especificación del estándar IEEE 754 que así lo determina.
+Operaciones aritméticas básicas
+let a = 100n
+let b = 200n
 
-// Operaciones que resultan en NaN
-console.log(0 / 0) // NaN
-console.log(Math.sqrt(-1)) // NaN
-console.log(Number('texto')) // NaN
-console.log(undefined + 1) // NaN
-Además, NaN es el único valor en JavaScript que no es igual a sí mismo. Esto tampoco es un error del lenguaje, también es parte de la especificación del estándar IEEE 754.
+// Operaciones básicas
+console.log(a + b) // 300n
+console.log(a - b) // -100n
+console.log(a * b) // 20000n
+console.log(b / a) // 2n (división entera)
+console.log(b % a) // 0n (módulo)
+console.log(a ** 2n) // 10000n (exponenciación)
 
-// NaN es especial: no es igual a sí mismo
-console.log(NaN === NaN) // false
-console.log(NaN == NaN) // false
-Además, Number tiene algunos métodos que te ayudarán a verificarlos. Existen dos métodos para hacerlo isNaN() y Number.isNaN(). ¿Cuál es la diferencia entre ambos y por qué hay dos?
+// ¡Ojo! La división siempre es entera, no te da los decimales
+console.log(7n / 2n) // 3n (no 3.5)
+console.log(10n / 3n) // 3n (no 3.333...)
+Comparaciones
+let x = 100n
+let y = 200n
 
-isNaN(): Convierte el valor a número primero y luego verifica si es NaN.
-Number.isNaN(): No convierte el valor a número, solo verifica si ya es NaN.
-console.log(isNaN('texto')) // true (convierte a número primero)
-console.log(Number.isNaN('texto')) // false
-isNaN() es una función global y es más antigua. Number.isNaN() es más nueva y sería la forma recomendada de verificar si un valor es NaN a día de hoy.
+// Comparaciones funcionan normalmente
+console.log(x < y) // true
+console.log(x > y) // false
+console.log(x === 100n) // true
+console.log(x !== y) // true
 
-Propiedades estáticas importantes
-Como hemos dicho, Number tiene algunas propiedades estáticas que te pueden ser útiles para tener acceso a algunos valores especiales:
+// Comparación con números regulares
+console.log(100n == 100) // true (coerción)
+console.log(100n === 100) // false (tipos diferentes)
+console.log(100n < 101) // true
+console.log(100n > 99) // true
+Operaciones bitwise
+Las operaciones bitwise son operaciones que se realizan bit a bit. Suelen ser operaciones más avanzadas que las aritméticas y de comparación. Y también son compatibles con los BigInt.
 
-// Valores límite
-console.log(Number.MAX_VALUE) // 1.7976931348623157e+308
-console.log(Number.MIN_VALUE) // 5e-324 (más pequeño positivo)
-console.log(Number.MAX_SAFE_INTEGER) // 9007199254740991
-console.log(Number.MIN_SAFE_INTEGER) // -9007199254740991
+let bits1 = 0b1010n // 10n
+let bits2 = 0b1100n // 12n
 
-// Constantes especiales
-console.log(Number.POSITIVE_INFINITY) // Infinity
-console.log(Number.NEGATIVE_INFINITY) // -Infinity
-console.log(Number.NaN) // NaN
+// Operadores bitwise
+console.log(bits1 & bits2) // 8n (AND)
+console.log(bits1 | bits2) // 14n (OR)
+console.log(bits1 ^ bits2) // 6n (XOR)
+console.log(~bits1) // -11n (NOT)
+console.log(bits1 << 2n) // 40n (shift left)
+console.log(bits1 >> 1n) // 5n (shift right)
+Restricciones importantes
+Ya hemos visto algunas restricciones a la hora de crear los BigInt. Pero también existen algunas restricciones a la hora de usarlos. Algunas de ellas, como mezclar con Number sin convertir explícitamente, suelen dar muchos problemas a los desarrolladores:
 
-// Epsilon (diferencia mínima entre números)
-console.log(Number.EPSILON) // 2.220446049250313e-16
-Métodos de Number
-Una vez tenemos un número
+No se puede mezclar con Number
+let bigint = 100n
+let number = 50
 
-Métodos de conversión
-let numero = 123.456789
+// ❌ Esto no funciona
+// console.log(bigint + number) // TypeError: Cannot mix BigInt and other types
 
-// toString - convierte a string
-console.log(numero.toString()) // "123.456789"
-console.log(numero.toString(2)) // "1111011.0111010..." (binario)
-console.log(numero.toString(16)) // "7b.74bc6a7ef9db2" (hexadecimal)
+// ✅ Hay que convertir explícitamente
+console.log(bigint + BigInt(number)) // 150n
+console.log(Number(bigint) + number) // 150
 
-// toFixed - fija decimales
-console.log(numero.toFixed(2)) // "123.46"
-console.log(numero.toFixed(0)) // "123"
+// ✅ O usar comparaciones que permiten coerción
+console.log(bigint > number) // true
+No funciona con Math
+let grande = 100n
 
-// toPrecision - fija dígitos significativos
-console.log(numero.toPrecision(4)) // "123.5"
-console.log(numero.toPrecision(2)) // "1.2e+2"
+// ❌ Math no acepta BigInt
+// Math.sqrt(grande) // TypeError: Cannot convert a BigInt value to a number
+// Math.max(10n, 20n) // TypeError
 
-// toExponential - notación científica
-console.log(numero.toExponential()) // "1.23456789e+2"
-console.log(numero.toExponential(2)) // "1.23e+2"
-Métodos estáticos de verificación
-// isInteger - verifica si es entero
-console.log(Number.isInteger(42)) // true
-console.log(Number.isInteger(42.0)) // true
-console.log(Number.isInteger(42.1)) // false
-
-// isSafeInteger - verifica si está en rango seguro
-console.log(Number.isSafeInteger(123)) // true
-console.log(Number.isSafeInteger(Math.pow(2, 53))) // false
-
-// isFinite - verifica si es finito
-console.log(Number.isFinite(42)) // true
-console.log(Number.isFinite(Infinity)) // false
-
-// isNaN - verifica si es NaN
-console.log(Number.isNaN(NaN)) // true
-console.log(Number.isNaN('texto')) // false
-Métodos de parsing
-// parseInt - convierte a entero
-console.log(Number.parseInt('42')) // 42
-console.log(Number.parseInt('42.7')) // 42
-console.log(Number.parseInt('42px')) // 42
-console.log(Number.parseInt('px42')) // NaN
-
-// Con base específica
-console.log(Number.parseInt('FF', 16)) // 255
-console.log(Number.parseInt('1010', 2)) // 10
-
-// parseFloat - convierte a decimal
-console.log(Number.parseFloat('42.7')) // 42.7
-console.log(Number.parseFloat('42.7px')) // 42.7
-console.log(Number.parseFloat('px42.7')) // NaN
-Operaciones matemáticas básicas
-let a = 10
-let b = 3
-
-// Operadores básicos
-console.log(a + b) // 13 (suma)
-console.log(a - b) // 7 (resta)
-console.log(a * b) // 30 (multiplicación)
-console.log(a / b) // 3.3333333333333335 (división)
-console.log(a % b) // 1 (módulo/resto)
-console.log(a ** b) // 1000 (exponenciación)
-
-// Operadores de incremento/decremento
-let contador = 5
-console.log(++contador) // 6 (pre-incremento)
-console.log(contador++) // 6 (post-incremento, luego contador = 7)
-console.log(--contador) // 6 (pre-decremento)
-console.log(contador--) // 6 (post-decremento, luego contador = 5)
-Precisión y problemas comunes
-Sobre los problemas de precisión decimal
-Como hemos visto, los números en JavaScript no son perfectos. Hay algunos problemas de precisión que debemos tener en cuenta.
-
-Problema clásico de punto flotante
-Este problema es muy conocido. Mucha gente, de forma erronea, cree que es algo específico de JavaScript. En realidad es algo que afecta a muchos lenguajes de programación.
-
-// Problema clásico de punto flotante
-console.log(0.1 + 0.2) // 0.30000000000000004
-console.log(0.1 + 0.2 === 0.3) // false
-Esto ocurre porque los números en JavaScript se representan en formato binario de punto flotante, lo que puede causar errores de precisión a la hora de hacer operaciones.
-
-// Soluciones
-function sumarDecimales(a, b, decimales = 2) {
-  return Number((a + b).toFixed(decimales))
+// ✅ Usa operaciones nativas de BigInt
+console.log(grande ** 2n) // 10000n para potencias
+No se puede usar con JSON
+let objeto = {
+  numero: 42,
+  grande: 123n
 }
 
-console.log(sumarDecimales(0.1, 0.2)) // 0.3
+// ❌ JSON.stringify no maneja BigInt
+// JSON.stringify(objeto) // TypeError: Do not know how to serialize a BigInt
 
-// Usando Number.EPSILON para comparaciones
-function sonIguales(a, b) {
-  return Math.abs(a - b) < Number.EPSILON
+// ✅ Solución: convertir a string
+let objetoSerializable = {
+  numero: objeto.numero,
+  grande: objeto.grande.toString()
 }
 
-console.log(sonIguales(0.1 + 0.2, 0.3)) // true
-Conversiones automáticas (coerción)
-Uno de los problemas más comunes que se pueden dar es cuando intentamos hacer operaciones con números y uno de ellos es un string. JavaScript intentará convertir el string a número y luego hacer la operación. A este paso se le conoce como coerción.
+console.log(JSON.stringify(objetoSerializable))
+// {"numero":42,"grande":"123"}
+Métodos de BigInt
+Métodos estáticos
+// BigInt.asIntN() - convierte a entero con signo de N bits
+console.log(BigInt.asIntN(8, 300n)) // 44n (300 en 8 bits con signo)
 
-La coerción es un proceso que se realiza automáticamente por el lenguaje cuando intentamos hacer operaciones con valores de tipos diferentes. En este caso, si detecta que uno de los valores es un número y el otro es un string, intentará convertir el string a número y luego hacer la operación.
+// BigInt.asUintN() - convierte a entero sin signo de N bits
+console.log(BigInt.asUintN(8, 300n)) // 44n (300 en 8 bits sin signo)
+console.log(BigInt.asUintN(8, -1n)) // 255n (-1 en 8 bits sin signo)
+Conversiones
+De BigInt a otros tipos
+let grande = 123456789n
 
-Siempre que puedas, deberías evitar esto y siempre trabajar con conversiones explícitas. Así te evitas sorpresas.
+// A Number (cuidado con la precisión)
+let comoNumber = Number(grande) // 123456789
+console.log(typeof comoNumber) // "number"
 
-// Conversión implícita en operaciones
-console.log('5' + 3) // "53" (concatenación)
-console.log('5' - 3) // 2 (resta numérica)
-console.log('5' * 3) // 15 (multiplicación)
-console.log('5' / 3) // 1.6666... (división)
+// A String
+let comoString = String(grande) // "123456789"
+let comoStringDirect = grande.toString() // "123456789"
 
-// Conversión con operador unario +
-console.log(+'42') // 42
-console.log(+true) // 1
-console.log(+false) // 0
-console.log(+'') // 0
-El operador unario + es una forma de convertir un string a número, si no lo es ya.
+// A Boolean
+let comoBoolean = Boolean(grande) // true
+console.log(Boolean(0n)) // false
+De otros tipos a BigInt
+// Desde Number (solo enteros en rango seguro)
+let desdeNumber = BigInt(42) // 42n
 
-Esta comparación
+// Desde String
+let desdeString = BigInt('123456789012345678901234567890')
 
-Examen interactivo
-¿Cuál es el resultado de 0.1 + 0.2 === 0.3 en JavaScript?
+// Desde Boolean
+let desdeTrue = BigInt(true) // 1n
+let desdeFalse = BigInt(false) // 0n
 
-true
+Palabras finales sobre BigInt
+BigInt es esencial cuando necesitas precisión en enteros grandes. Suele usarse en temas de criptografía o financieros, ya que es importante no perder información al hacer operaciones con números muy grandes.
 
-false
-¡Correcto! 0.1 + 0.2 resulta en 0.30000000000000004 debido a la representación binaria de decimales.
+Enteros muy grandes: Más allá de Number.MAX_SAFE_INTEGER
+Precisión exacta: Sin pérdida de precisión en enteros
+Limitaciones importantes:
 
-undefined
-¿Qué valor devuelve Number.isNaN("texto")?
-
-true
-
-false
-¡Exacto! Number.isNaN() devuelve false porque "texto" no es NaN, es un string.
-
-NaN
-¿Cuál es la diferencia entre parseInt("42px") y Number("42px")?
-
-Ambos devuelven 42
-
-parseInt devuelve 42, Number devuelve NaN
-¡Correcto! parseInt() parsea hasta encontrar un carácter no numérico, mientras que Number() requiere que todo el string sea válido.
-
-Ambos devuelven NaN
-¿Qué es Number.MAX_SAFE_INTEGER?
-
-El número más grande que JavaScript puede representar
-
-El entero más grande que se puede representar con precisión
-¡Correcto! Es 2^53 - 1, el entero más grande donde todos los enteros menores pueden ser representados exactamente.
-
-Siempre es 1000000
-¿Qué hace (123.456).toFixed(2)?
-
-Devuelve 123.456
-
-Devuelve "123.46"
-¡Exacto! toFixed(2) redondea a 2 decimales y devuelve un string.
-
-Devuelve 123.46
-¿Cuál es el resultado de NaN === NaN?
-
-true
-
-false
-¡Correcto! NaN no es igual a nada, ni siquiera a sí mismo. Por eso existe Number.isNaN().
-
-NaN
-Límites de enteros seguros
-En JavaScript hay un límite de enteros seguros. Este límite es el número 2^53 - 1. Si intentas hacer operaciones con números más grandes que este límite, podrías perder precisión. Para saber cuál es el número más grande que se puede representar con precisión, puedes usar la propiedad Number.MAX_SAFE_INTEGER.
-
-// Enteros seguros
-console.log(Number.MAX_SAFE_INTEGER) // 9007199254740991
-console.log(Number.MAX_SAFE_INTEGER + 1) // 9007199254740992
-console.log(Number.MAX_SAFE_INTEGER + 2) // 9007199254740992 (¡es igual!)
-Como ves en el código anterior, una vez que llegamos al límite de enteros seguros, cualquier operación que hagamos con ellos nos dará resultados inesperados así que ten cuidado.
-
-Para hacer operaciones con números más grandes que el límite de enteros seguros, puedes usar el tipo BigInt. Lo veremos más adelante.
-
-Palabras finales sobre number
-Un sólo tipo: number para enteros y decimales
-IEEE 754: Estándar de punto flotante de 64 bits
-Valores especiales: Infinity, -Infinity, y NaN
-Métodos útiles: Para conversión, formateo y validación
-Conversiones: Automáticas en muchas operaciones
-Limitaciones: Problemas de precisión y límites de enteros seguros
-Es importante entender las limitaciones de precisión y usar las herramientas adecuadas para trabajar con números de manera segura y precisa.
+No se mezcla con Number sin conversión explícita
+No funciona con Math
+No se serializa automáticamente en JSON
+Sólo para enteros (no decimales)
+Soporte limitado en navegadores antiguos
+BigInt es una herramienta poderosa para casos específicos donde la precisión de enteros grandes es crítica.

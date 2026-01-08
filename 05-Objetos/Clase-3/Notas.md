@@ -1,128 +1,86 @@
-Operador de Encadenamiento Opcional
-Si intentamos acceder a una propiedad de un objeto que no existe... ¡se romperá nuestra aplicación!
+Iterando Objetos en JavaScript
+El manejo de objetos es uno de los pilares en JavaScript y es crucial conocer cómo podemos iterar o recorrer los mismos. Existen varias formas de hacerlo y en esta clase vamos a revisar algunas de las más comunes: el bucle for...in y los métodos Object.keys(), Object.values() y Object.entries().
 
-Por suerte, existen formas de evitar que esto ocurra. En esta clase veremos algunas de ellas y presentaremos el operador de Encadenamiento Opcional, también llamado Optional Chaining.
+Iterando con for...in
+La estructura de control for...in nos permite crear un bucle que itera sobre todas las propiedades enumerables de un objeto, en un orden arbitrario.
 
-Este operador es especialmente útil cuando trabajamos con objetos que podrían tener estructuras complejas o variables que podrían no estar definidas en determinados momentos de la ejecución de nuestro código.
-
-El error fatal de intentar leer una propiedad de undefined
-Uno de los errores más comunes en JavaScript, y que estoy seguro que verás tarde o temprano, es el que dice que no puedes leer una propiedad de undefined.
-
-Este error ocurre cuando intentamos acceder a una propiedad de un objeto que no existe. Por ejemplo:
-
-const gamesystem = {
-  name: 'PS5',
-  price: 550,
-  specs: {
-    cpu: 'AMD Ryzen Zen 2',
-    gpu: 'AMD Radeon RDNA 2',
-  }
+const spiderman = {
+  name: 'Spidey',
+  universe: 42,
+  powers: ['web', 'invisibility', 'spider-sense']
 }
 
-console.log(gamesystem.name) // -> PS5
-
-console.log(gamesystem.specifications) // -> undefined
-
-console.log(gamesystem.specifications.ram) 
-// ❌ Uncaught TypeError: Cannot read property 'ram' of undefined
-El error parece inocente pero fíjate. En lugar de usar la propiedad specs hemos usado specifications. Pero esto es suficiente para que JavaScript nos diga que no puede leer la propiedad ram de undefined.
-
-Evitando el error con if
-Una forma de evitar este error es usando un if para comprobar si la propiedad existe antes de intentar acceder a ella:
-
-if (typeof gamesystem.specifications === 'object') {
-  console.log(gamesystem.specifications.ram)
-} else {
-  console.log('No hay especificaciones')
-}
-¡Cuidado con esto! Al usar el operador typeof con un valor null nos dice que es object. Esto es un error histórico del lenguaje. Así que si la propiedad specifications es null, el if se ejecutará y obtendremos un error al intentar acceder a ram. Para evitar esto, podemos añadir una comprobación extra: gamesystem.specifications !== null.
-
-Estamos usando el operador typeof para comprobar si la propiedad specifications es un objeto. Ya lo vimos en la primera sección del curso y nos ayuda a asegurarnos que specifications existe y es un objeto, antes de acceder a su propiedad ram.
-
-El operador in para comprobar si una propiedad existe
-Otra forma de comprobar si una propiedad existe es usando el operador in. Este operador comprueba si una propiedad existe en un objeto y devuelve true o false:
-
-console.log('name' in gamesystem) // -> true
-console.log('specifications' in gamesystem) // -> false
-console.log('specs' in gamesystem) // -> true
-
-if ('specifications' in gamesystem) {
-  console.log(gamesystem.specifications.ram)
-} else {
-  console.log('No hay especificaciones')
-}
-¡Pero ojo! ¿Qué pasa si la propiedad existe pero su valor es undefined?
-
-const gamesystem = {
-  name: 'PS5',
-  price: 550,
-  specifications: undefined,
+for (const property in spiderman) {
+  console.log(`${property}: ${spiderman[property]}`);
 }
 
-console.log('specifications' in gamesystem) // -> true
+// -> name: Spidey
+// -> universe: 42
+// -> powers: web,invisibility,spider-sense
+No confundas el bucle for...in con el de for...of que vimos en la sección de arrays. El primero itera sobre las propiedades enumerables de un objeto, mientras que el segundo itera sobre los elementos de un objeto iterable (como los elementos de un array, por ejemplo).
 
-gamesystem.specifications.ram
-// ❌ Uncaught TypeError: Cannot read property 'ram' of undefined
-El operador in puede ser interesante para comprobar si una propiedad existe en un objeto, pero no nos sirve para comprobar si el valor de esa propiedad es undefined y habría que hacer comprobaciones extra para evitar el error.
+Transformar un objeto en un array
+A veces queremos transformar un objeto en un array para poder iterar sobre él. Para esto podemos utilizar el método Object.keys(), Object.values() o Object.entries().
 
-if (
-  'specifications' in gamesystem &&
-  gamesystem.specifications !== undefined &&
-  gamesystem.specifications !== null) {
-  console.log(gamesystem.specifications.ram)
-} else {
-  console.log('No hay especificaciones')
-}
-Mucho código para algo tan simple. Por suerte, existe una forma más sencilla de hacerlo.
+Cada uno de estos métodos retorna un array, pero cada uno de ellos contiene elementos diferentes. Vamos a verlos uno por uno.
 
-El operador de Encadenamiento Opcional, ?.
-El Operador de Encadenamiento Opcional ?. permite leer el valor de una propiedad ubicada profundamente dentro de una cadena de objetos conectados, sin tener que validar expresamente que cada referencia en la cadena es válida.
+Iterar con Object.keys()
+El método Object.keys() retorna un array con las propiedades enumerables de un objeto.
 
-const gamesystem = {
-  name: 'PS5',
-  price: 550,
-  specs: {
-    cpu: 'AMD Ryzen Zen 2',
-    gpu: 'AMD Radeon RDNA 2',
-  }
+const spiderman = {
+  name: 'Spidey',
+  universe: 42,
+  powers: ['web', 'invisibility', 'spider-sense']
 }
 
-console.log(gamesystem.specifications?.cpu)
-// -> undefined
-console.log(gamesystem.specs?.cpu)
-// -> AMD Ryzen Zen 2
-Si la propiedad specifications no existe, el operador ?. devuelve undefined y no se produce ningún error. Si la propiedad existe, el operador ?. devuelve el valor de la propiedad.
+const properties = Object.keys(spiderman)
 
-Beneficios del Operador de Encadenamiento Opcional
-Uno de los principales beneficios del operador de encadenamiento opcional es que simplifica nuestro código y lo hace más legible. En lugar de tener que hacer varias comprobaciones para asegurarnos de que un objeto y sus propiedades existen, podemos intentar acceder directamente a la propiedad que nos interesa, y JavaScript no se quejará si no existe.
+console.log(properties.length) // 3
 
-Este operador es especialmente útil en aplicaciones con datos dinámicos, donde no siempre podemos garantizar la estructura exacta de nuestros objetos.
+properties.forEach(property => {
+  console.log(property)
+})
 
-const user = {
-  name: 'Peter',
-  settings: {
-    theme: 'dark',
-    notifications: {
-      email: true,
-      push: false,
-      marketing: undefined
-    }
-  }
-}
+// -> name
+// -> universe
+// -> powers
+Este código hace algo muy similar al anterior, pero utilizando Object.keys() para obtener las propiedades del objeto.
 
-// la forma clásica de acceder a una propiedad anidada
-// de forma segura
-let email = undefined
-if (user && user.settings &&
-  user.settings.notifications &&
-  user.settings.notifications.email) {
-  email = user.settings.notifications.email
-}
+¿Qué son las propiedades enumerables? Por defecto, cuando añadimos propiedades a un objeto, estas son enumerables, es decir, que se pueden iterar sobre ellas. Sin embargo, como veremos más adelante, podemos crear propiedades que, por lo que sea, nos interesa que no sean enumerables. A veces estas son más de uso interno, como métodos auxiliares que el propio lenguaje JavaScript tiene, y no queremos que aparezcan cuando iteramos sobre un objeto.
 
-console.log(email) // -> true
+Iterando con Object.values()
+El método Object.values() retorna un array con los valores correspondientes a las propiedades enumerables de un objeto.
 
-// con Optional Chaining Operator
-const email = user?.settings?.notifications?.email
-console.log(email) // -> true
-El operador de encadenamiento opcional es una excelente herramienta para trabajar con objetos en JavaScript, especialmente cuando no podemos garantizar la estructura o presencia de ciertos datos. Nos ayuda a escribir un código más limpio, legible y resistente a errores.
+const values = Object.values(spiderman)
 
+values.forEach(value => {
+  console.log(value)
+})
+
+// -> Spidey
+// -> 42
+// -> [ 'web', 'invisibility', 'spider-sense' ]
+Como ves, la diferencia con Object.values() es que este método retorna los valores y Object.keys() retorna las propiedades.
+
+Iterando con Object.entries()
+El método Object.entries() retorna un array de arrays, donde cada subarray es un par [propiedad, valor] correspondiente a las propiedades enumerables de un objeto.
+
+const entries = Object.entries(spiderman)
+
+entries.forEach(entry => {
+  console.log(entry)
+})
+
+// -> [ 'name', 'Spidey' ]
+// -> [ 'universe', 42 ]
+// -> [ 'powers', [ 'web', 'invisibility', 'spider-sense' ] ]
+Lo interesante es que este método nos da acceso tanto a las propiedades como a los valores. Lo puedes ver más claro en el siguiente ejemplo:
+
+const entries = Object.entries(spiderman)
+
+entries.forEach(entry => {
+  const property = entry[0]
+  const value = entry[1]
+
+  console.log(`${property}: ${value}`)
+})
